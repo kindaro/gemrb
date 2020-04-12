@@ -556,6 +556,22 @@ add_custom_target( dist
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
+
+# Extract docstrings from GUIScript and convert them to Markdown.
+# ----------------------------------
+
+# A target to build the docstring extractor.
+
+add_executable (docstring_extractor
+  docstring_extractor.cpp gemrb/plugins/GUIScript/PythonHelpers.cpp)
+target_include_directories (docstring_extractor PRIVATE ${PYTHON_INCLUDE_PATH})
+set_target_properties (docstring_extractor PROPERTIES COMPILE_FLAGS
+	"${CMAKE_CXX_FLAGS} -fno-strict-aliasing -Wno-deprecated-declarations")
+target_link_libraries (docstring_extractor
+	${PYTHON_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS})
+target_link_libraries (docstring_extractor gemrb_core)
+
+
 # pretty-print options macro
 # as of 2.8 cmake does not support anything like EVAL
 MACRO(PRINT_OPTION option)
