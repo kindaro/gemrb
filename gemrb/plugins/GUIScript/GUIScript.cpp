@@ -15729,8 +15729,6 @@ static PyMethodDef GemRBMethods[] = {
 	METHOD(UseItem, METH_VARARGS),
 	METHOD(ValidTarget, METH_VARARGS),
 	METHOD(VerbalConstant, METH_VARARGS),
-	// terminating entry
-	{NULL, NULL, 0, NULL}
 };
 
 static PyMethodDef GemRBInternalMethods[] = {
@@ -15823,8 +15821,6 @@ static PyMethodDef GemRBInternalMethods[] = {
 	METHOD(WorldMap_AdjustScrolling, METH_VARARGS),
 	METHOD(WorldMap_GetDestinationArea, METH_VARARGS),
 	METHOD(WorldMap_SetTextColor, METH_VARARGS),
-	// terminating entry
-	{NULL, NULL, 0, NULL}
 };
 
 GUIScript::GUIScript(void)
@@ -15917,12 +15913,21 @@ bool GUIScript::Init(void)
 	pMainDic = PyModule_GetDict( pMainMod );
 	/* pMainDic is a borrowed reference */
 
-	PyObject* pGemRB = Py_InitModule3( "GemRB", GemRBMethods, GemRB__doc );
+	/* Python API requires a pointer to an appropriately terminated list, so we
+	   allocate such a list on the heap and populate it from our morally immutable
+	   array. Ideally we would like a deep copy here. */
+	int stride = sizeof (PyMethodDef);
+	methodsTable = (PyMethodDef *) calloc ((sizeof GemRBMethods / stride + 1), stride);
+	memcpy (methodsTable, GemRBMethods, sizeof GemRBMethods);
+	internalMethodsTable = (PyMethodDef *) calloc ((sizeof GemRBMethods / sizeof (PyMethodDef) + 1), stride);
+	memcpy (internalMethodsTable, GemRBInternalMethods, sizeof GemRBInternalMethods);
+
+	PyObject* pGemRB = Py_InitModule3( "GemRB", methodsTable, GemRB__doc );
 	if (!pGemRB) {
 		return false;
 	}
 
-	PyObject* p_GemRB = Py_InitModule3( "_GemRB", GemRBInternalMethods, GemRB_internal__doc );
+	PyObject* p_GemRB = Py_InitModule3( "_GemRB", internalMethodsTable, GemRB_internal__doc );
 	if (!p_GemRB) {
 		return false;
 	}
