@@ -66,6 +66,9 @@ public:
 	PyObject *RunFunction(const char* moduleName, const char* fname, PyObject* pArgs, bool report_error = true);
 	PyObject* ConstructObject(const char* classname, int arg);
 	PyObject* ConstructObject(const char* classname, PyObject* pArgs);
+private:
+  PyMethodDef * methodsTable;
+  PyMethodDef * internalMethodsTable;
 };
 
 extern GUIScript *gs;

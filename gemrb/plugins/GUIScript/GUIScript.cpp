@@ -158,22 +158,20 @@ bool GUIScript::Init(void)
 	/* pMainDic is a borrowed reference */
 
   /* Python API requires a pointer to an appropriately terminated list, so we
-  allocate such list on the heap and populate it from our morally immutable
-  array. */
-  PyMethodDef * (* allocate_method_list) (PyMethodDef const * const, int) = [ ]
-    (PyMethodDef const * const u, int n)
-  {
-    PyMethodDef * v = (PyMethodDef *) calloc ((n + 1), sizeof (PyMethodDef));
-    memcpy (v, u, n * sizeof (PyMethodDef));
-    return v;
-  };
+  allocate such a list on the heap and populate it from our morally immutable
+  array. Ideally we would like a deep copy here. */
+  int stride = sizeof (PyMethodDef);
+  methodsTable = (PyMethodDef *) calloc ((sizeof GemRBMethods / stride + 1), stride);
+  memcpy (methodsTable, GemRBMethods, sizeof GemRBMethods);
+  internalMethodsTable = (PyMethodDef *) calloc ((sizeof GemRBMethods / sizeof (PyMethodDef) + 1), stride);
+  memcpy (internalMethodsTable, GemRBInternalMethods, sizeof GemRBInternalMethods);
 
-  PyObject* pGemRB = Py_InitModule3( "GemRB", allocate_method_list (GemRBMethods, sizeof GemRBMethods / sizeof (PyMethodDef)), GemRB__doc );
+  PyObject* pGemRB = Py_InitModule3( "GemRB", methodsTable, GemRB__doc );
   if (!pGemRB) {
 		return false;
 	}
 
-	PyObject* p_GemRB = Py_InitModule3( "_GemRB", allocate_method_list (GemRBInternalMethods, sizeof GemRBInternalMethods / sizeof (PyMethodDef)), GemRB_internal__doc );
+	PyObject* p_GemRB = Py_InitModule3( "_GemRB", internalMethodsTable, GemRB_internal__doc );
 	if (!p_GemRB) {
 		return false;
 	}
