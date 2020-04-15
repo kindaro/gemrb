@@ -173,4 +173,10 @@ bool PythonObjectCallback<WindowKeyPress>::operator() (WindowKeyPress *);
 
 }
 
+
+PyObject* RuntimeError(const char* msg);
+
+PyObject* AttributeError(const char* doc_string);
+
 #endif
+

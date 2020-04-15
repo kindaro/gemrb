@@ -156,3 +156,33 @@ long CallPythonWithReturn(PyObject *Function, PyObject *args) {
 }
 
 }
+
+static bool QuitOnError = false;
+
+/* Sets RuntimeError exception and returns NULL, so this function
+ * can be called in `return'.
+ */
+PyObject* RuntimeError(const char* msg)
+{
+	Log(ERROR, "GUIScript", "Runtime Error:");
+	PyErr_SetString( PyExc_RuntimeError, msg );
+	if (QuitOnError) {
+		core->ExitGemRB();
+	}
+	return NULL;
+}
+
+/* Prints error msg for invalid function parameters and also the function's
+ * doc string (given as an argument). Then returns NULL, so this function
+ * can be called in `return'. The exception should be set by previous
+ * call to e.g. PyArg_ParseTuple()
+ */
+PyObject* AttributeError(const char* doc_string)
+{
+	Log(ERROR, "GUIScript", "Syntax Error:");
+	PyErr_SetString(PyExc_AttributeError, doc_string);
+	if (QuitOnError) {
+		core->ExitGemRB();
+	}
+	return NULL;
+}
