@@ -15830,6 +15830,9 @@ GUIScript::GUIScript(void)
 	pModule = NULL; //should decref it
 	pMainDic = NULL; //borrowed, but used outside a function
 	pGUIClasses = NULL;
+
+	methodsTable = NULL;
+	internalMethodsTable = NULL;
 }
 
 GUIScript::~GUIScript(void)
@@ -15859,6 +15862,16 @@ GUIScript::~GUIScript(void)
 	if (UsedItems) {
 		free(UsedItems);
 		UsedItems=NULL;
+	}
+
+	if (internalMethodsTable) {
+		free(internalMethodsTable);
+		internalMethodsTable=NULL;
+	}
+
+	if (methodsTable) {
+		free(methodsTable);
+		methodsTable=NULL;
 	}
 
 	StoreSpellsCount = -1;
